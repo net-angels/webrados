@@ -511,12 +511,6 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
     memset(current_data[c].qstring, '\0', sizeof (current_data[c].qstring));
     memset(current_data[c].requri, '\0', sizeof (current_data[c].requri));
     current_data[c].cLength = 0;
-    /* Metadata */
-    //    memset(current_data[c].metadata.extension, '\0', sizeof (current_data[c].metadata.extension));
-    //    memset(current_data[c].metadata.mime, '\0', sizeof (current_data[c].metadata.mime));
-    //    current_data[c].metadata.f_size = 0;
-    //    current_data[c].metadata.c_time = 0;
-    //    current_data[c].metadata.m_time = 0;
 
     char *contentLength = FCGX_GetParam("CONTENT_LENGTH", req->envp);
     char *rmethod = FCGX_GetParam("REQUEST_METHOD", req->envp);
@@ -586,30 +580,7 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
             current_data[c].filename[i] = '\0';
 
     }
-    /* Metadata */
-    //    uint64_t osize = 0;
-    //    time_t ptime;
-    //    char *extension = strrchr(current_data[c].filename, '.');
-    //    char *mime = get_mime(current_data[c].filename);
-    //
-    //    if (NULL != extension && mime != NULL) {
-    //        strncpy(current_data[c].metadata.extension, extension, 8);
-    //        strncpy(current_data[c].metadata.mime, mime, 32);
-    //        current_data[c].metadata.c_time = time(NULL);
-    //
-    //        if (0 == strcmp(current_data[c].method, "PUT")) {
-    //            if (0 == rados_stat(&IO, (const char *) current_data[c].filename, &osize, &ptime)) {
-    //                current_data[c].metadata.m_time = ptime;
-    //                current_data[c].metadata.f_size = osize;
-    //            }
-    //        } else {
-    //            current_data[c].metadata.f_size = current_data[c].cLength;
-    //        }
-    //    }
-    //
-
-    //
-    //if (mime)FREE(mime);
+    
     if (duplicate)FREE(duplicate);
     if (p)FREE(p);
     contentLength = NULL;
