@@ -1,0 +1,230 @@
+#include <fcgi_config.h>
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <fcgi_stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <syslog.h>
+#include <librados.h>
+#include <stdbool.h>
+
+char *strip_chars(const char *string, const char *chars) {
+    char * newstr = malloc(strlen(string) + 1);
+    int counter = 0;
+
+    for (; *string; string++) {
+        if (!strchr(chars, *string)) {
+            newstr[ counter ] = *string;
+            ++counter;
+        }
+    }
+
+    newstr[counter] = 0;
+    return newstr;
+}
+
+int main() {
+    const char program[] = "CephUploader";
+    char *param = NULL, *p = NULL;
+    char tmp[100];
+    char *stripped = NULL;
+    char filename[32 + 1];
+    char poolname[32 + 1];
+    char clustername[32 + 1];
+    char delim[2] = "|";
+    char cb[1];
+    int len = 0;
+    int sz = 0;
+    static bool connected = false;
+    static bool ctr = true;
+    //
+    rados_ioctx_t io = NULL;
+    rados_completion_t comp;
+    rados_t cluster = NULL;
+
+    const char ceph_config[] = "/etc/ceph/ceph.conf";
+    uint64_t flags;
+    int err = 0;
+
+    openlog(program, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL0);
+    syslog(LOG_INFO, "Starting application\n");
+    while (FCGI_Accept() >= 0) {
+        //
+        stripped = NULL;
+        p = NULL;
+        param = NULL;
+        memset(filename, '\0', 33);
+        memset(poolname, '\0', 33);
+        memset(clustername, '\0', 33);
+        memset(tmp, '\0', 99);
+        //
+        printf("Content-type: text/html\r\n\r\n");
+        //
+        char *contentLength = getenv("CONTENT_LENGTH");
+        param = getenv("QUERY_STRING");
+
+        if (param != NULL) {
+            syslog(LOG_INFO, "Inside param != NULL %s\n", param);
+            strncpy(tmp, param, 99);
+        }
+        //
+        syslog(LOG_INFO, "Tmp = %s\n", tmp);
+        p = strtok(tmp, delim);
+        if (p != NULL) {
+            syslog(LOG_INFO, "Inside strtok_cluster: %s\n", p);
+            stripped = strip_chars(p, "-_.!?@#$%^&*()=+'\";:,<>/");
+            sz = strlen(stripped);
+            if (sz > 32)sz = 32;
+            snprintf(clustername, sz + 1, "%s", stripped);
+        }
+        //
+        syslog(LOG_INFO, "+Cluster: %s - %ld\n", clustername, strlen(clustername));
+        //
+        p = strtok(NULL, delim);
+        syslog(LOG_INFO, "Before strtok_poolname: %s\n", p);
+        if (p != NULL) {
+            syslog(LOG_INFO, "Inside strtok_poolname: %s\n", p);
+            stripped = NULL;
+            stripped = strip_chars(p, "-_.!?@#$%^&*()=+'\";:,<>/");
+            sz = strlen(stripped);
+            if (sz > 32)sz = 32;
+            snprintf(poolname, sz + 1, "%s", p);
+        }
+        //
+        syslog(LOG_INFO, "+Poolname: %s - %ld\n", poolname, strlen(poolname));
+        //
+        p = strtok(NULL, delim);
+        if (p != NULL) {
+            syslog(LOG_INFO, "Inside strtok_filename: %s\n", p);
+            stripped = NULL;
+            stripped = strip_chars(p, "!?@#$%^&*()=+'\";:,<>/");
+            sz = strlen(stripped);
+            if (sz > 32)sz = 32;
+            snprintf(filename, sz + 1, "%s", stripped);
+        }
+        //
+        syslog(LOG_INFO, "+Filename: %s - %ld\n", filename, strlen(filename));
+        //
+        if (NULL == clustername || NULL == poolname || NULL == filename ||
+                (0 == strcmp(clustername, "")) || (0 == strcmp(poolname, "")) || (0 == strcmp(filename, ""))) {
+            printf("No parameters given<br />\n");
+            printf("Sample: curl -T filename http://uploadhost.com/pathwhatever?clustername|poolname|filename\n");
+            syslog(LOG_INFO, "No parameters given\n");
+            ctr = false;
+            continue;
+        } else {
+            ctr = true;
+        }
+        //
+        if (contentLength != NULL) {
+            len = strtol(contentLength, NULL, 10);
+        } else {
+            len = 0;
+        }
+
+        //
+        if (len <= 0) {
+            printf("No data from standard input\n");
+            syslog(LOG_INFO, "Cluster: %s - %ld\n", clustername, strlen(clustername));
+            syslog(LOG_INFO, "Pool: %s - %ld\n", poolname, strlen(poolname));
+            syslog(LOG_INFO, "File: %s - %ld\n", filename, strlen(filename));
+        } else {
+            int i, ch, written = 0;
+            //
+            if (ctr) {
+                if (!connected) {
+                    syslog(LOG_INFO, "Creating cluster handle\n");
+                    err = rados_create(&cluster, NULL);
+                    if (err < 0) {
+                        syslog(LOG_INFO, "Cannot create a cluster handle: %s\n", strerror(-err));
+                        continue;
+                    } else {
+                        connected = true;
+                    }
+                    //
+                    syslog(LOG_INFO, "Reading CEPH config file\n");
+                    err = rados_conf_read_file(cluster, ceph_config);
+                    if (err < 0) {
+                        syslog(LOG_INFO, "Cannot read config file: %s\n", strerror(-err));
+                        continue;
+                    }
+                } else {
+                    syslog(LOG_INFO, "Already connected to cluster\n");
+                }
+                //
+                syslog(LOG_INFO, "Connecting to cluster\n");
+                err = rados_connect(cluster);
+                if (err < 0) {
+                    syslog(LOG_INFO, "Cannot connect to cluster: %s\n", strerror(-err));
+                    continue;
+                }
+                //
+                syslog(LOG_INFO, "Opening rados pool [%s]\n", poolname);
+                err = rados_ioctx_create(cluster, poolname, &io);
+                if (err < 0) {
+                    syslog(LOG_INFO, "Cannot open rados pool %s: %s\n", poolname, strerror(-err));
+                    rados_shutdown(cluster);
+                    continue;
+                }
+                syslog(LOG_INFO, "Creating completion\n");
+                err = rados_aio_create_completion(NULL, NULL, NULL, &comp);
+                if (err < 0) {
+                    syslog(LOG_INFO, "Could not create aio completion: %s\n", strerror(-err));
+                    rados_ioctx_destroy(io);
+                    rados_shutdown(cluster);
+                    continue;
+                }
+                syslog(LOG_INFO, "Expecting %d bytes\n", len);
+                ////////////////////////////////////////////////////////////////////
+                for (i = 0; i < len; i++) {
+                    if ((ch = FCGI_getchar()) < 0) {
+                        syslog(LOG_INFO, "Error: Not enough bytes received on standard input\n");
+                        break;
+                    }
+                    memset(cb, '\0', 1);
+                    sprintf(cb, "%d", ch);
+                    err = rados_aio_append(io, filename, comp, (const char *) cb, sizeof (char));
+                    if (err < 0) {
+                        syslog(LOG_INFO, "Could not schedule aio write: %s\n", strerror(-err));
+                        rados_aio_release(comp);
+                        rados_ioctx_destroy(io);
+                        rados_shutdown(cluster);
+                        break;
+                    } else {
+                        written++;
+                    }
+                }
+                syslog(LOG_INFO, "Written %d bytes\n", written);
+                ////////////////////////////////////////////////////////////////////
+                syslog(LOG_INFO, "Waiting for completion\n");
+                rados_aio_wait_for_complete(comp);
+                rados_aio_wait_for_safe(comp);
+                syslog(LOG_INFO, "Releasing completion\n");
+                rados_aio_release(comp);
+                //
+                syslog(LOG_INFO, "Destroying IO\n");
+                if (io != NULL) {
+                    rados_ioctx_destroy(io);
+                }
+                //
+                syslog(LOG_INFO, "Shutting down cluster\n");
+                if (cluster != NULL) {
+                    rados_shutdown(cluster);
+                }
+            } /* if (ctr) */
+        } /* else */
+        //
+        if (stripped) {
+            free(stripped);
+        }
+
+    } /* while */
+    //
+
+    FCGI_Finish();
+    syslog(LOG_INFO, "Closing application\n");
+    closelog();
+    return 0;
+}

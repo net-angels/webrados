@@ -1,0 +1,99 @@
+#ifndef UTCEPH_H
+#define	UTCEPH_H
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+#include <fcgi_config.h>
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <fcgi_stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <syslog.h>
+#include <librados.h>
+#include <stdbool.h>
+#include <libconfig.h>
+#include <pthread.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>  
+#include <sys/syscall.h>
+
+#define FREE(ptr) do{ \
+    free((ptr));      \
+    (ptr) = NULL;     \
+  }while(0)
+
+#define BUFFSZ 4194304
+#define MB 1048576
+#define GB 1073741824
+#define UMIN(a,b) ((a)>(b)?(b):(a))
+#define CFG_PARAM_LEN 32
+#define MAXPOOLS 65535
+
+
+
+    FCGX_Request request;
+    pthread_t id[MAXPOOLS];
+    pthread_attr_t attr;
+    pthread_mutex_t mutex_write, mutex_read, mutex_stat, mutex_mime, mutex_accept;
+    sigset_t ths;
+
+    const char created[] = "Status: 201 Created\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n\r\nCreated<br />\n";
+    const char not_found[] = "Status: 404 OK\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n\r\nNot found<br />\n";
+    const char not_supported[] = "Status: 200 OK\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n\r\nNot supported<br />\n";
+    const char forbidden[] = "Status: 403 Forbidden\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n\r\nForbidden<br />\n";
+
+    const char ceph_config[] = "/etc/ceph/ceph.conf";
+    char config_file[] = "/etc/uploader.conf";
+    const char program[] = "CephUploader";
+
+    int logger_fd = 0;
+    pthread_attr_t attr;
+
+    struct {
+        char *user;
+        char *group;
+        char *logfile;
+        char *pidfile;
+        char *socket;
+        int threads_count;
+        char **pools;
+    } globals;
+
+    struct _current_data {
+        char filename[256];
+        char poolname[32];
+        char method[8];
+        char requri[256];
+        long int cLength;
+    } current_data;
+
+    typedef struct {
+        int no;
+        long clen;
+        char poolname[32];
+        char filename[256];
+        char method[8];
+        int connfd;
+        FCGX_Request request;
+    } req_params;
+    req_params req_pass;
+    char buffer[BUFFSZ] = {0};
+
+    //int err;
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* UTCEPH_H */
+
