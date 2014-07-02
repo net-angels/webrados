@@ -5,6 +5,9 @@ It does not provide any extra possibilities, like RadosGateway,
 just add(append mode), fetch, delete and stat.
 
 	INSTALL
+
+Make sure you have CEPH installed and run
+		
 		git clone https://github.com/net-angels/webrados.git
 		cd webrados;
 		apt-get install libconfig-dev libconfig<num>
@@ -21,7 +24,7 @@ just add(append mode), fetch, delete and stat.
 		vi /etc/uploader.conf
 		#add lines below
 		threads-count = 100;
-		foreground = true;
+		foreground = false;
 		group = "www-data";
 		user = "www-data";
 		socket = "/tmp/webrados.sock";
@@ -31,7 +34,8 @@ just add(append mode), fetch, delete and stat.
 		ceph-user = "admin";
 		rados-mount = ["bucket_allowed1","bucket_allowed"];
 
-		
+	RUN
+		./radosweb.fcgi -c /etc/uploader.conf -f /etc/ceph/ceph.conf
 	
 	USAGE
 		Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename
