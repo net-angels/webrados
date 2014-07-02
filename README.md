@@ -3,7 +3,7 @@ Webrados
 This software provides REST access to CEPH storage directly. 
 It does not provide any extra possibilities, like RadosGateway,
 just add(append mode), fetch, delete and stat.
-Before installing, make sure you have CEPH installed and run (hint: http://reborns.info/ustanovka-ceph-storage-cluster-za-15-minut/).
+Before installing, make sure you have CEPH installed and running (hint: http://reborns.info/ustanovka-ceph-storage-cluster-za-15-minut/).
 
 	INSTALL
 
