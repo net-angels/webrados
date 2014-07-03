@@ -5,7 +5,7 @@ It does not provide any extra possibilities, like RadosGateway,
 just add(append mode), fetch, delete and stat.
 Before installing, make sure you have CEPH installed and running (hint: http://reborns.info/ustanovka-ceph-storage-cluster-za-15-minut/).
 
-	INSTALL
+INSTALL
 
 		git clone https://github.com/net-angels/webrados.git
 		cd webrados;
@@ -33,14 +33,14 @@ Before installing, make sure you have CEPH installed and running (hint: http://r
 		ceph-user = "admin";
 		rados-mount = ["bucket_allowed1","bucket_allowed"];
 
-	RUN
+RUN
 		./radosweb.fcgi -c /etc/uploader.conf -f /etc/ceph/ceph.conf
 	
-	USAGE
+USAGE
 		Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename
 		Download: curl -XGET http://uploadhost.com/poolname/filename
 		Delete: curl -XDELETE http://uploadhost.com/poolname/filename
 		Stat: curl -XOPTIONS http://uploadhost.com/poolname/filename
 
-	DEPENDENCIES
+DEPENDENCIES
 		libpthread, libfcgi-dev,libfcgi,librados-dev,librados,libconfig-dev,libconfig
