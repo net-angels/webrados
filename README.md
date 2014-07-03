@@ -3,9 +3,11 @@ WebRados
 This software provides REST access to CEPH storage directly. The goal of WebRados is to provide simple and fast access to RADOS. 
 This is single tenant system, which allows website owners with large amount of static files effectively serve data stored in CEPH.                             
 WebRados works directly with RADOS and provide access to CEPH's bare object-storage layer.
+
 Unlike RadosGW it does not provide S3/Swift compatible API.
 
 Supported modes are  fetch,  delete, stat
+
 Before installing WebRados make sure you have CEPH installed and running (https://ceph.com/docs/master/rados/deployment/ceph-deploy-install).
 
 Installation
