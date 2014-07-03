@@ -1,8 +1,11 @@
 WebRados
 ---------
 This software provides REST access to CEPH storage directly. 
-It does not provide any extra possibilities, like RadosGateway,
-just add(append mode), fetch, delete and stat.
+The goal of WebRados is to provide as simple and fast as possible acces to RADOS.
+This is single tenant system which aims to help website owners with large ammount of statis file to effectively srore and retrieve data in reliable CEPH cluster. 
+If you need something multi tenant and with more features plese refer to Ceph/RadosGateway.
+
+Supported modes are  fetch,  delete, stat
 Before installing, make sure you have CEPH installed and running (https://ceph.com/docs/master/rados/deployment/ceph-deploy-install).
 
 Installation
@@ -44,10 +47,10 @@ Run
 	
 Usage
 		
-		Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename
-		Download: curl -XGET http://uploadhost.com/poolname/filename
-		Delete: curl -XDELETE http://uploadhost.com/poolname/filename
-		Stat: curl -XOPTIONS http://uploadhost.com/poolname/filename
+		Put     : curl -XPUT -T filename http://uploadhost.com/poolname/filename
+		Get     : curl -XGET http://uploadhost.com/poolname/filename
+		Deletee : curl -XDELETE http://uploadhost.com/poolname/filename
+		Status  : curl -XOPTIONS http://uploadhost.com/poolname/filename
 
 Dependencies 
 		
