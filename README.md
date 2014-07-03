@@ -34,6 +34,7 @@ INSTALL
 		rados-mount = ["bucket_allowed1","bucket_allowed"];
 
 RUN
+		
 		./radosweb.fcgi -c /etc/uploader.conf -f /etc/ceph/ceph.conf
 	
 USAGE
@@ -44,4 +45,5 @@ USAGE
 		Stat: curl -XOPTIONS http://uploadhost.com/poolname/filename
 
 DEPENDENCIES
+		
 		libpthread, libfcgi-dev,libfcgi,librados-dev,librados,libconfig-dev,libconfig
