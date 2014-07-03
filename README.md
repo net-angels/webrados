@@ -37,6 +37,7 @@ RUN
 		./radosweb.fcgi -c /etc/uploader.conf -f /etc/ceph/ceph.conf
 	
 USAGE
+		
 		Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename
 		Download: curl -XGET http://uploadhost.com/poolname/filename
 		Delete: curl -XDELETE http://uploadhost.com/poolname/filename
