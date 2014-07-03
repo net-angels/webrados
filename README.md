@@ -1,9 +1,6 @@
 WebRados
 ---------
-This software provides REST access to CEPH storage directly. 
-The goal of WebRados is to provide as simple and fast as possible acces to RADOS.
-This is single tenant system which aims to help website owners with large ammount of statis file to effectively srore and retrieve data in reliable CEPH cluster. 
-If you need something multi tenant and with more features plese refer to Ceph/RadosGateway.
+This software provides REST access to CEPH storage directly. The goal of Web Rados is to provide as simple and fast as possible access to RADOS. This is single tenant system which aims to help website owners with large amount of static file to effectively store and retrieve data in reliable CEPH cluster. If you need something multi tenant and with more features please refer to Ceph/RadosGateway.
 
 Supported modes are  fetch,  delete, stat
 Before installing, make sure you have CEPH installed and running (https://ceph.com/docs/master/rados/deployment/ceph-deploy-install).
