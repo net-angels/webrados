@@ -1,4 +1,4 @@
-Webrados
+WebRados
 ---------
 This software provides REST access to CEPH storage directly. 
 It does not provide any extra possibilities, like RadosGateway,
