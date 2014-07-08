@@ -28,20 +28,8 @@ NginX Sample config
 		include fastcgi_params;
 		}
 		
-
-WebRados config. This file does not exist. 
-Create new file with following content 
-
-		threads-count = 100;
-		foreground = false;
-		group = "www-data";
-		user = "www-data";
-		socket = "/tmp/webrados.sock";
-		pidfile = "/var/run/webrados.pid";
-		logfile = "/var/log/ceph/webrados.log";
-		logging = true;
-		ceph-user = "admin";
-		rados-mount = ["bucket_allowed1","bucket_allowed"];
+WebRados config. Sample webrados.conf file can be in cloned directory
+Adjust webrados.conf to meet your needs and copy to /etc
 
 Run
 		
