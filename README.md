@@ -37,10 +37,11 @@ Run
 	
 Usage
 		
-		Put     : curl -XPUT -T filename http://uploadhost.com/poolname/filename
-		Get     : curl -XGET http://uploadhost.com/poolname/filename
-		Deletee : curl -XDELETE http://uploadhost.com/poolname/filename
-		Status  : curl -XOPTIONS http://uploadhost.com/poolname/filename
+		Upload       : curl -XPUT -T filename http://uploadhost.com/poolname/filename
+		Download     : curl -XGET http://uploadhost.com/poolname/filename
+		Delete       : curl -XDELETE http://uploadhost.com/poolname/filename
+		File Status  : curl -XOPTIONS http://uploadhost.com/poolname/filename
+		Server Stats : curl -XGET http://uploadhost.com/?status
 
 Dependencies 
 		
