@@ -2,7 +2,7 @@
 :
 rm -rf *.o
 
-if [ -d  ./bin  ] ; thenrm -rf ./bin ; fi 
+if [ -d  ./bin  ] ; then rm -rf ./bin ; fi 
 
 gcc -Wall  -zmuldefs -g -ggdb -O0    -c -g -I/usr/include/rados -lconfig -o config.o config.c
 gcc -Wall  -zmuldefs -g -ggdb -O0    -c -g -I/usr/include/rados -lconfig -o logs.o logs.c
