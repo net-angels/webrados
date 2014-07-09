@@ -70,6 +70,12 @@ WebRados config. Sample webrados.conf file.
 	ceph-user = "admin";
 	rados-mount = ["StarWars","pics","pics2","test"];
 
+Be sure to create rados-mount pools before running webrados.fcgi
+	
+	rados mkpool StarWars 
+	rados mkpool foo
+	rados mkpool blah
+
 Adjust webrados.conf to meet your needs and copy to /etc
 
 Run
