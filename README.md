@@ -1,12 +1,10 @@
 WebRados
 ---------
-This software provides REST access to CEPH storage directly. The goal of WebRados is to provide simple and fast access to RADOS. 
+WebRados provides simple and fast access to CEPH, it works directly with librados  and access CEPH's via bare object-storage layer.
 This is single tenant system, which allows website owners with large amount of static files effectively serve data stored in CEPH.                             
-WebRados works directly with RADOS and provide access to CEPH's bare object-storage layer.
 
 Unlike RadosGW it does not provide S3/Swift compatible API.
-
-Supported modes are  fetch,  delete, stat
+Access API is primitive as possible and supports fetch,  delete, stat
 
 Before installing WebRados make sure you have CEPH installed and running (https://ceph.com/docs/master/rados/deployment/ceph-deploy-install).
 
@@ -18,9 +16,13 @@ Installation
 		apt-get install librados-dev librados
 		apt-get install libfcgi-dev libfcgi
 		./makeinstall.sh
-		vi /etc/nginx/sites-enabled/webrados.conf
 
-NginX Sample config
+Script will build webrados.fcgi and put it to webrados/bin/ directory
+After compile is completed you can copy webrados.fcgi to any servers and run. 
+Binary file requires libconfig and librados to be installed on destination servers.
+
+NginX Sample config. 
+Some of parameters like cache and access restrictions are not mandatory, but we think that having these is always a good idea. 
 
 	fastcgi_cache_path /opt/nginx_cache/cache  keys_zone=one:720m  loader_threshold=500 loader_files=2000 max_size=2048000m;
 	fastcgi_cache_key "$scheme$request_method$host$request_uri";
