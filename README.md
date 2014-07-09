@@ -21,9 +21,9 @@ Installation
 		vi /etc/nginx/sites-enabled/webrados.conf
 
 NginX Sample config
+
 	fastcgi_cache_path /opt/nginx_cache/cache  keys_zone=one:720m  loader_threshold=500 loader_files=2000 max_size=2048000m;
 	fastcgi_cache_key "$scheme$request_method$host$request_uri";
-
 	server {
         	server_name _;
 	        listen   80;
