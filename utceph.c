@@ -2,8 +2,9 @@
 #include "protos.h"
 
 static int busyWorkers = 0;
-pthread_mutex_t accept_mutex[MAXPOOLS];
-pthread_mutex_t counter_mutex[MAXPOOLS];
+static pthread_mutex_t accept_mutex = PTHREAD_MUTEX_INITIALIZER; //[MAXPOOLS];
+static pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER; //[MAXPOOLS];
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void setRightOwner(const char *path) {
     if (NULL == path)return;
@@ -285,7 +286,7 @@ void *doit(void *ptr) {
     sigset_t ths;
     int rc, worker_no = *((int *) ptr);
     bool ctr = true;
-    rados_ioctx_t io  = NULL;
+    rados_ioctx_t io = NULL;
     rados_t cluster;
     FCGX_Request request;
 
@@ -293,18 +294,16 @@ void *doit(void *ptr) {
     FCGX_InitRequest(&request, listenfd, 0);
 
     for (;;) {
-        if (0 != pthread_mutex_init(&counter_mutex[worker_no], NULL))return NULL;
-        if (0 != pthread_mutex_init(&accept_mutex[worker_no], NULL)) return NULL;
         /* counter */
-        pthread_mutex_lock(&counter_mutex[worker_no]);
+        pthread_mutex_lock(&counter_mutex);
         if (busyWorkers > 0) {
             busyWorkers--;
         }
-        pthread_mutex_unlock(&counter_mutex[worker_no]);
+        pthread_mutex_unlock(&counter_mutex);
         /* accept */
-        pthread_mutex_lock(&accept_mutex[worker_no]);
+        pthread_mutex_lock(&accept_mutex);
         rc = FCGX_Accept_r(&request);
-        pthread_mutex_unlock(&accept_mutex[worker_no]);
+        pthread_mutex_unlock(&accept_mutex);
         if (rc < 0) {
             logger("[%d] Can not accept: %s", tid, strerror(errno));
             continue;
@@ -315,14 +314,16 @@ void *doit(void *ptr) {
             continue;
         }
         /* increment busyWorkers */
-        pthread_mutex_lock(&counter_mutex[worker_no]);
+        pthread_mutex_lock(&counter_mutex);
         busyWorkers++;
-        pthread_mutex_unlock(&counter_mutex[worker_no]);
+        pthread_mutex_unlock(&counter_mutex);
         /* fill data */
+        pthread_mutex_lock(&mutex);
         fill_current_data(&request, &io, worker_no);
+        pthread_mutex_unlock(&mutex);
         /* show status */
         if (0 == strncmp("status", current_data[worker_no].qstring, 6)) {
-            FCGX_FPrintF(request.out, "%s<br />Total workers: %d<br />\nBusy workers: %d<br />\n", ok, globals.threads_count, busyWorkers);
+            FCGX_FPrintF(request.out, "%s\nTotal workers: %d\nBusy workers: %d\n", ok, globals.threads_count, busyWorkers);
             FCGX_Finish_r(&request);
             continue;
         }
@@ -455,9 +456,7 @@ void *doit(void *ptr) {
                     FCGX_FFlush(request.out);
                 }/* if PUT */
                 else if (0 == strcmp(current_data[worker_no].method, "GET")) {
-                    //uint64_t bytes = 
                     GET(io, &request, current_data[worker_no].filename, tid);
-                    //logger("[%d] Downloaded: [%s] %ld bytes", tid, current_data[worker_no].filename, bytes);
                 } else if (0 == strcmp(current_data[worker_no].method, "DELETE")) {
                     if (0 > (err = rados_remove(io, current_data[worker_no].filename))) {
                         logger("[%d] Could not delete object '%s'", tid, current_data[worker_no].filename);
@@ -493,8 +492,9 @@ end:
         if (cluster != NULL) {
             rados_shutdown(cluster);
         }
-        pthread_mutex_destroy(&accept_mutex[worker_no]);
-        pthread_mutex_destroy(&counter_mutex[worker_no]);
+
+        pthread_mutex_destroy(&accept_mutex);
+        pthread_mutex_destroy(&counter_mutex);
     }
 
     return NULL;
@@ -511,13 +511,12 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
     memset(current_data[c].qstring, '\0', sizeof (current_data[c].qstring));
     memset(current_data[c].requri, '\0', sizeof (current_data[c].requri));
     current_data[c].cLength = 0;
+    getrusage(RUSAGE_THREAD, &current_data[c].usage);
 
     char *contentLength = FCGX_GetParam("CONTENT_LENGTH", req->envp);
     char *rmethod = FCGX_GetParam("REQUEST_METHOD", req->envp);
     char *requri = FCGX_GetParam("REQUEST_URI", req->envp);
     char *qstring = FCGX_GetParam("QUERY_STRING", req->envp);
-
-    getrusage(RUSAGE_THREAD, &current_data[c].usage);
 
     if (contentLength != NULL) {
         current_data[c].cLength = strtol(contentLength, NULL, 10);
@@ -561,6 +560,7 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
             strncat(current_data[c].filename, "/", 1);
         }
     }
+
     int filename_sz = strlen(current_data[c].filename);
     if (current_data[c].filename[filename_sz - 1] == '/') {
         current_data[c].filename[filename_sz - 1] = '\0';
@@ -572,6 +572,7 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
             count++;
         }
     }
+
     if (count == 1) {
         for (i = 0; i < filename_sz && current_data[c].filename[i] != '\0'; i++) {
             current_data[c].filename[i] = current_data[c].filename[i + 1];
