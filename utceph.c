@@ -330,34 +330,21 @@ void *doit(void *ptr) {
         /* show usage */
         if (0 == strncmp("usage", current_data[worker_no].qstring, 5)) {
             int c;
-            FCGX_FPrintF(request.out, "%s<br />", ok);
-            FCGX_FPrintF(request.out, "<meta http-equiv=\"refresh\" content=\"1\">");
-            FCGX_FPrintF(request.out, "<table border='1'>\n");
-            FCGX_FPrintF(request.out, "<tr>"
-                    "<td>Thread no</td>"
-                    "<td>Max resident set size (kb)</td>"
-                    "<td>Sharing text segment memory (kb/s)</td>"
-                    "<td>Data segment memory (kb/s)</td>"
-                    "<td>Stack memory used (kb/s)</td>"
-                    "<td>Soft page faults</td>"
-                    "<td>Hard page faults</td>"
-                    "<td>Input operations</td>"
-                    "<td>Output operations</td>"
-                    "</tr>\n");
+            FCGX_FPrintF(request.out, "%s%s\n\n", ok, usage_header);
+
             for (c = 0; c < globals.threads_count; c++) {
-                FCGX_FPrintF(request.out, "<tr>");
-                FCGX_FPrintF(request.out, "<td>%d</td>", c);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_maxrss);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_ixrss);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_idrss);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_isrss);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_minflt);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_majflt);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_inblock);
-                FCGX_FPrintF(request.out, "<td>%ld</td>", current_data[c].usage.ru_oublock);
-                FCGX_FPrintF(request.out, "</tr>");
+                FCGX_FPrintF(request.out, "%d", c);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_maxrss);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_ixrss);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_idrss);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_isrss);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_minflt);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_majflt);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_inblock);
+                FCGX_FPrintF(request.out, "%30ld", current_data[c].usage.ru_oublock);
+                FCGX_FPrintF(request.out, "\n");
+
             }
-            FCGX_FPrintF(request.out, "</table>\n");
             FCGX_FFlush(request.out);
             FCGX_Finish_r(&request);
             continue;
@@ -473,7 +460,7 @@ void *doit(void *ptr) {
                         logger("[%d] Could not stat object '%s'", tid, current_data[worker_no].filename);
                         FCGX_FPrintF(request.out, "%s", not_found);
                     } else {
-                        FCGX_FPrintF(request.out, "%sSize: %ld<br />\nLast modified: %ld<br />\n", ok, size, Time);
+                        FCGX_FPrintF(request.out, "%sSize: %ld\nLast modified: %ld\n", ok, size, Time);
                     }
                     FCGX_FFlush(request.out);
                 } else {
@@ -581,7 +568,7 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
             current_data[c].filename[i] = '\0';
 
     }
-    
+
     if (duplicate)FREE(duplicate);
     if (p)FREE(p);
     contentLength = NULL;

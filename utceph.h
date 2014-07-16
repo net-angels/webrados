@@ -58,37 +58,49 @@ extern "C" {
 
     pthread_t id[MAXPOOLS];
     
+    const char usage_header[] =
+                    "Thread no   "
+                    "Max resident set size (kb)   "
+                    "Sharing text segment memory (kb/s)   "
+                    "Data segment memory (kb/s)   "
+                    "Stack memory used (kb/s)   "
+                    "Soft page faults   "
+                    "Hard page faults   "
+                    "Input operations   "
+                    "Output operations";
+
+
     const char ok[] = "Status: 200 OK\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\n";
     const char deleted[] = "Status: 200 OK\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nDeleted<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nDeleted\n";
 
     const char created[] = "Status: 201 Created\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nCreated<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nCreated\n";
 
     const char not_found[] = "Status: 404 OK\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nNot found<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nNot found\n";
 
     const char not_supported[] = "Status: 200 OK\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nNot supported<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nNot supported\n";
 
     const char forbidden[] = "Status: 403 Forbidden\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nForbidden<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nForbidden\n";
 
     const char usage[] = "Status: 200 OK\r\n"
-            "Content-type: text/html\r\n\r\n"
-            "No parameters given<br />\n"
-            "Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename<br />\n"
-            "Download: curl -XGET http://uploadhost.com/poolname/filename<br />\n"
-            "Delete: curl -XDELETE http://uploadhost.com/poolname/filename<br />\n"
-            "Stat: curl -XOPTIONS http://uploadhost.com/poolname/filename<br />\n";
+            "Content-type: text/plain\r\n\r\n"
+            "No parameters given\n"
+            "Upload: curl -XPUT -T filename http://uploadhost.com/poolname/filename\n"
+            "Download: curl -XGET http://uploadhost.com/poolname/filename\n"
+            "Delete: curl -XDELETE http://uploadhost.com/poolname/filename\n"
+            "Stat: curl -XOPTIONS http://uploadhost.com/poolname/filename\n";
 
     const char no_data[] = "Status: 200 OK\r\n"
-            "Content-type: text/html\r\n\r\n"
+            "Content-type: text/plain\r\n\r\n"
             "No data from standard input\n";
 
     const char ierror[] = "Status: 500 Internal Error\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n\r\nInternal error<br />\n";
+            "Content-Type: text/plain; charset=UTF-8\r\n\r\nInternal error\n";
 
     const char program[] = "RadosWeb";
     FILE * pid_fd = NULL;
