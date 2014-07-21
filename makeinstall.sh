@@ -14,4 +14,5 @@ gcc -Wall  -zmuldefs -g -ggdb -O0    -c -g -I/usr/include/rados -lconfig -o utce
 mkdir bin
 
 gcc -Wall  -zmuldefs -g -ggdb -O0     -o bin/webrados.fcgi config.o logs.o memory.o method.o signal.o utceph.o /usr/lib/libfcgi.so /usr/lib/librados.so -lconfig -lpthread   
- 
+cp init.d/webrados /etc/init.d/webrados
+update-rc.d webrados defaults 
