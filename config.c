@@ -15,7 +15,8 @@ bool is_whitelisted(char *pool) {
 void read_config(char *cfg_file) {
     config_t cfg, *cf;
     const config_setting_t *whitelisted_pools = NULL;
-    int count, i = 0, tc;
+    int count, i = 0;
+    WBR_INT tc;
 
     const char *user;
     const char *group;
@@ -46,7 +47,11 @@ void read_config(char *cfg_file) {
         }
 
     }
+#if (LIBCONFIG_VER_MAJOR == 1 && LIBCONFIG_VER_MINOR >= 4)
     debug("Workers count: %d", globals.threads_count);
+#else
+	debug("Workers count: %ld", globals.threads_count);
+#endif    
 
     if (!config_lookup_bool(cf, "foreground", &globals.foreground)) {
         debug("%s", "Configuration entry 'foreground' not found");

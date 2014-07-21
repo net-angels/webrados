@@ -121,8 +121,8 @@ extern "C" {
     } meta;
 
     struct {
-        WBR_INT logging;
-        WBR_INT foreground;
+        int logging;
+        int  foreground;
         char *user;
         char *group;
         char *logfile;
