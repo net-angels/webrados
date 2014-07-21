@@ -40,7 +40,13 @@ extern "C" {
 #define UMIN(a,b) ((a)>(b)?(b):(a))
 #define CFG_PARAM_LEN 32
 #define MAXPOOLS 65535
-
+    
+#if (LIBCONFIG_VER_MAJOR == 1 && LIBCONFIG_VER_MINOR >= 4)
+    typedef int WBR_INT;
+#else
+    typedef long WBR_INT;
+#endif
+    
     bool exitflag = false;
     static const struct option longOpts[] = {
         { "config", required_argument, NULL, 'c'},
@@ -115,8 +121,8 @@ extern "C" {
     } meta;
 
     struct {
-        int logging;
-        int foreground;
+        WBR_INT logging;
+        WBR_INT foreground;
         char *user;
         char *group;
         char *logfile;
@@ -125,7 +131,7 @@ extern "C" {
         char *configfile;
         char *ceph_config;
         char *ceph_user;
-        int threads_count;
+        WBR_INT threads_count;
         char **pools;
     } globals;
 
