@@ -464,7 +464,7 @@ void *doit(void *ptr) {
                     }
                     FCGX_FFlush(request.out);
                 } else {
-                    logger("[%d] Method %s not supported", tid, current_data[worker_no].method);
+                    logger("[%d] Method %s not supported", tid, (0 == strcmp(current_data[worker_no].method, "")) ? "<empty>" : current_data[worker_no].method);
                     FCGX_FPrintF(request.out, "%s", not_supported);
                     FCGX_FFlush(request.out);
                 }
@@ -537,7 +537,6 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
 
     int z = 0, remains = 0;
 
-    strncat(current_data[c].filename, "/", 1);
     while (NULL != (p = strtok(NULL, "/"))) {
         z = strlen(p);
         remains = 254 - strlen(current_data[c].filename);
@@ -551,22 +550,6 @@ void fill_current_data(FCGX_Request *req, rados_ioctx_t *IO, int c) {
     int filename_sz = strlen(current_data[c].filename);
     if (current_data[c].filename[filename_sz - 1] == '/') {
         current_data[c].filename[filename_sz - 1] = '\0';
-    }
-    int i = 0, count = 0;
-
-    for (i = 0; i < filename_sz; i++) {
-        if (current_data[c].filename[i] == '/') {
-            count++;
-        }
-    }
-
-    if (count == 1) {
-        for (i = 0; i < filename_sz && current_data[c].filename[i] != '\0'; i++) {
-            current_data[c].filename[i] = current_data[c].filename[i + 1];
-        }
-        for (; i < filename_sz; i++)
-            current_data[c].filename[i] = '\0';
-
     }
 
     if (duplicate)FREE(duplicate);
