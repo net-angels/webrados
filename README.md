@@ -8,7 +8,7 @@ Access API is primitive as possible and supports fetch,  delete, stat
 
 Before installing WebRados make sure you have CEPH installed and running (https://ceph.com/docs/master/rados/deployment/ceph-deploy-install).
 
-If you use ceph-deploy tool to install Ceph cluster make sure that keyrig path exists in ceph.conf 
+If you use ceph-deploy tool to install Ceph cluster make sure that keyring path exists in ceph.conf
 
 		keyring = /etc/ceph/ceph.client.admin.keyring
 
