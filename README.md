@@ -1,4 +1,4 @@
-WebRados
+WebRados (Archived Project. This project is not maintained anymore)
 ---------
 WebRados provides simple and fast access to CEPH, it works directly with librados  and access CEPH's via bare object-storage layer.
 This is single tenant system, which allows website owners with large amount of static files effectively serve data stored in CEPH.                             
